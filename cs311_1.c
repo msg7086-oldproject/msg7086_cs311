@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <malloc.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 const char *opt_string = "ob:h?";
 void display_usage(char *prog);
@@ -72,6 +73,10 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/* Timing */
+	struct timeval time_start;
+	gettimeofday(&time_start, NULL);
+
 	/* Copy data */
 	int num_read = 0, num_write;
 	char *buffer = (char *)malloc(buffer_length * sizeof(char));
@@ -91,12 +96,22 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/* Timing */
+	struct timeval time_end;
+	gettimeofday(&time_end, NULL);
+
 	if (close(src_fd) == -1)
 		puts("Unable to close source file");
 	if (close(dst_fd) == -1)
 		puts("Unable to close destination file");
 
-	exit(EXIT_SUCCESS);
+
+	int ms = (time_end.tv_sec - time_start.tv_sec) * 1000000 + time_end.tv_usec - time_start.tv_usec;
+	if (ms < 0)
+		ms += 86400000000;
+	printf("%d\t%d\n", buffer_length, ms);
+
+	return 0;
 }
 
 void display_usage(char *prog)
