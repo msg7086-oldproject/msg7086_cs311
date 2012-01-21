@@ -2,8 +2,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <malloc.h>
+#include <stdio.h>
 
 const char *opt_string = "ob:h?";
+void display_usage(char *prog);
 
 int main(int argc, char **argv)
 {
@@ -12,6 +14,7 @@ int main(int argc, char **argv)
 	int buffer_length = 8192;
 	bool overwrite = false;
 	char opt;
+	/* Parse command line options */
 	opt = getopt(argc, argv, opt_string);
 	while (opt != -1) {
 		switch (opt) {
@@ -25,7 +28,7 @@ int main(int argc, char **argv)
 
 			case 'h':
 			case '?':
-				display_usage();
+				display_usage(argv[0]);
 				return 0;
 				break;
 
@@ -36,7 +39,7 @@ int main(int argc, char **argv)
 	}
 
 	if (optind > argc - 2) {
-		display_usage();
+		display_usage(argv[0]);
 		return -1;
 	}
 	src_file = argv[optind++];
@@ -69,6 +72,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/* Copy data */
 	int num_read = 0, num_write;
 	char *buffer = (char *)malloc(buffer_length * sizeof(char));
 	if (buffer == NULL) {
@@ -93,4 +97,11 @@ int main(int argc, char **argv)
 		puts("Unable to close destination file");
 
 	exit(EXIT_SUCCESS);
+}
+
+void display_usage(char *prog)
+{
+	printf("Usage: %s [options] <source> <dest>\n", prog);
+	puts(" -o                  Overwrite destination file\n"
+	     " -h, -?              Display help\n");
 }
